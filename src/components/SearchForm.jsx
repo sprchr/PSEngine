@@ -5,7 +5,7 @@ const SearchForm = ({index}) => {
   const [query, setQuery] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
-
+ const user = localStorage.getItem('user')
   const handleSearch = async () => {
     if (!query.trim()) {
       return;
@@ -13,7 +13,7 @@ const SearchForm = ({index}) => {
     setLoading(true);
     setResult(null)
     try {
-      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/search/${index}`, { query });
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/search/${user.slice(1,user.length-1).toLowerCase()}-${index}`, { query });
       setResult(response.data.answer);
     } catch (error) {
       setResult("Error fetching result.");

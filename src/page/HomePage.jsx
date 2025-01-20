@@ -12,6 +12,7 @@ const HomePage = () => {
     if(!user){
       await signInWithPopup(auth, googleProvider);
     }
+    localStorage.setItem('user', JSON.stringify(auth.currentUser.uid));
     navigate("/dashboard");
   } catch (error) {
     console.error("Google login failed", error.message);

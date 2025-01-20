@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 const UploadForm = ({index}) => {
-  const [pdfFile, setPdfFile] = useState(null);
+  const [File, setFile] = useState(null);
   const [uploadMessage, setUploadMessage] = useState("");
   const [loading ,setLoading] = useState(false)
   const [files, setFiles] = useState([]);
@@ -10,52 +10,72 @@ const UploadForm = ({index}) => {
   const [error, setError] = useState("");
   const [deleteData,setDeleteData] = useState(false)
   const handleFileChange = (e) => {
-    setPdfFile(e.target.files[0]);
+    setFile(e.target.files[0]);
   };
 
+   const user = localStorage.getItem('user')
+   const handleUpload = async () => {
+    setUploadMessage("");
+    setLoading(true);
   
-  const handleUpload = async () => {
-    setUploadMessage("")
-    setLoading(true)
-
-    if (!pdfFile) {
-      setUploadMessage("Please select a PDF file to upload.");
+    // Validate if a file is selected
+    if (!File) {
+      setUploadMessage("Please select a file to upload.");
+      setLoading(false);
       return;
     }
-
+  
+    // Validate supported file types
+    const allowedTypes = [
+      "application/pdf", // PDF
+      "text/csv",        // CSV
+      "text/plain",      // Text files
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" // Word (docx)
+    ];
+  
+    if (!allowedTypes.includes(File.type)) {
+      setUploadMessage("Unsupported file type. Please upload a PDF, CSV, Word,Excel or text file.");
+      setLoading(false);
+      return;
+    }
+  
     const formData = new FormData();
-    formData.append("pdf", pdfFile);
+    formData.append("file", File);
+  
     try {
-      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/upload/${index}`, formData, 
+      const response = await axios.post(
+        `${import.meta.env.VITE_BACKEND_URL}/upload/${user.slice(1, user.length - 1).toLowerCase()}-${index}`,
+        formData,
         {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      setUploadMessage(response.data.message);
-      // console.log(response)
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+  
+      setUploadMessage(response.data.message); // Success message from the backend
     } catch (error) {
-      setUploadMessage("Error uploading PDF: " + error.response.data.message);
-    } finally{
-      // const response = await axios.get(`http://localhost:3001/files/${index}`)
-    
-        fetchFiles()
-      
-      // setFiles(response.data)
-      setLoading(false)
+      setUploadMessage(
+        "Error uploading file: " + (error.response?.data?.message || error.message)
+      );
+    } finally {
+      fetchFiles(); // Refresh the file list
+      setLoading(false);
     }
   };
+
 
   // Fetch files on component mount
   const deleteFile = async (file) => {
     setDeleteData(true)
     try {
       // console.log(file)
-      const response = await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/files/${index}`, {
+      const response = await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/files/${user.slice(1,user.length-1).toLowerCase()}-${index}`, {
         data: { file },
       });
       
-     console.log(response);
+    //  console.log(response);
      
     } catch (err) {
       setError("Error deleting file.");
@@ -66,7 +86,7 @@ const UploadForm = ({index}) => {
   };
   const fetchFiles = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/files/${index}`);
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/files/${user.slice(1,user.length-1).toLowerCase()}-${index}`);
       setFiles(response.data);
     } catch (err) {
       setError("Error fetching files.");
