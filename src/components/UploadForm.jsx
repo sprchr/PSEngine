@@ -101,7 +101,7 @@ const UploadForm = ({index}) => {
   return (
     
     <div className="p-4  border-2  bg-white shadow-2xl rounded-lg">
-      <h2 className="text-xl font-semibold mb-4">Upload PDF</h2>
+      <h2 className="text-xl font-semibold mb-4">Upload File</h2>
       <input type="file" onChange={handleFileChange} className="mb-4 p-2 border rounded" />
       {loading ? "Uploading..." : ""}
       <button
