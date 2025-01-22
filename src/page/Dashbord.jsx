@@ -10,7 +10,7 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
   const [errorInput, setInputError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal visibility state
-
+  const [modalLoading,setModalLoading] =useState(false)
   const navigate = useNavigate();
 
   const user = localStorage.getItem("user");
@@ -61,6 +61,7 @@ const Dashboard = () => {
     }
   };
   const createIndex = async (e) => {
+    setModalLoading(true)
     e.preventDefault();
     setInputError("");
     setError("");
@@ -100,6 +101,8 @@ const Dashboard = () => {
       console.log("Index created successfully:", response.data);
       setLoading(false); // Hide the loading state
       setIsModalOpen(false); // Close the modal after submitting
+      setModalLoading(false)
+      setIndexName("")
     } catch (error) {
       console.error("Error creating index:", error);
       setError("Failed to create index. Please try again.");
@@ -204,8 +207,10 @@ const Dashboard = () => {
                 <button
                   type="submit"
                   className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                  
+                  disabled={modalLoading}
                 >
-                  Submit
+                 {modalLoading ? "Creating..." : "Create Index"}
                 </button>
               </div>
             </form>

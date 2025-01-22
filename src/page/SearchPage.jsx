@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 const SearchPage = () => {
-   const navigate = useNavigate()
+    const navigate = useNavigate()
     const { indexNumber } = useParams();
   return (
     <div className="m-10 mt-2">

@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState,useRef } from 'react';
 import axios from 'axios';
+
 
 const UploadForm = ({index}) => {
   const [File, setFile] = useState(null);
@@ -9,6 +10,7 @@ const UploadForm = ({index}) => {
   const [loadingFile, setLoadingFile] = useState(true);
   const [error, setError] = useState("");
   const [deleteData,setDeleteData] = useState(false)
+  const fileInputRef = useRef(null);
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
   };
@@ -55,13 +57,21 @@ const UploadForm = ({index}) => {
       );
   
       setUploadMessage(response.data.message); // Success message from the backend
+
     } catch (error) {
       setUploadMessage(
         "Error uploading file: " + (error.response?.data?.message || error.message)
       );
     } finally {
-      fetchFiles(); // Refresh the file list
+  
       setLoading(false);
+      setFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""; // Reset the input value
+      }
+      setTimeout(async () => {
+        await fetchFiles(); // Call your fetchFiles function after 3 seconds
+      }, 3000); 
     }
   };
 
@@ -80,11 +90,14 @@ const UploadForm = ({index}) => {
     } catch (err) {
       setError("Error deleting file.");
     } finally{
-        fetchFiles()
-          setDeleteData(false)
+        setDeleteData(false)
+        setTimeout(async () => {
+          await fetchFiles(); // Call your fetchFiles function after 3 seconds
+        }, 2000);
     }
   };
   const fetchFiles = async () => {
+  
     try {
       const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/files/${user.slice(1,user.length-1).toLowerCase()}-${index}`);
       setFiles(response.data);
@@ -97,12 +110,11 @@ const UploadForm = ({index}) => {
   useEffect(() => {
     fetchFiles();
   }, []);
-
   return (
     
     <div className="p-4  border-2  bg-white shadow-2xl rounded-lg">
       <h2 className="text-xl font-semibold mb-4">Upload File</h2>
-      <input type="file" onChange={handleFileChange} className="mb-4 p-2 border rounded" />
+      <input    ref={fileInputRef} type="file" onChange={handleFileChange} className="mb-4 p-2 border rounded" />
       {loading ? "Uploading..." : ""}
       <button
         onClick={handleUpload}
