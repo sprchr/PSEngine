@@ -50,14 +50,35 @@ const Dashboard = () => {
           .slice(1, user.length - 1)
           .toLowerCase()}-${index}`
       );
+      
       console.log("Index deleted successfully:", response.data);
-      await getIndex(); // Refresh the list of indexes after deletion
+     // Refresh the list of indexes after deletion
     } catch (error) {
       console.error("Error deleting index:", error);
       setError("Failed to delete index.");
     } finally {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/index`,
+        {
+          params: {
+            name: user, // Pass the 'user' value as a query parameter
+          },
+        }
+      );
+      const result = response.data.map((item) => item.slice(user.length - 1));
+      // console.log("after deleting:",result);
+      
+      if(result.length > 0) {
+        if (result.some((f) => f === index)) {
+          const updatedFiles = result.filter((f) => f !== index);
+          setIndex(updatedFiles);
+        } 
+      }
+      else {
+        setIndex(response.data)
+      }
+    
       setLoading(false); // End the loading state
-      getIndex();
     }
   };
   const createIndex = async (e) => {
