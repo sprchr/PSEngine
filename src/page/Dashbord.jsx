@@ -120,14 +120,20 @@ const Dashboard = () => {
       // Refresh the index list
       await getIndex();
       console.log("Index created successfully:", response.data);
-      setLoading(false); // Hide the loading state
-      setIsModalOpen(false); // Close the modal after submitting
+      setLoading(false); 
+      setIsModalOpen(false); 
       setModalLoading(false)
       setIndexName("")
     } catch (error) {
       console.error("Error creating index:", error);
-      setError("Failed to create index. Please try again.");
+      setError("Failed to create index,Please reload the page");
+      
     } 
+    finally{
+      setIsModalOpen(false); 
+      setModalLoading(false)
+      setLoading(false); 
+    }
   };
 
   useEffect(() => {
@@ -167,7 +173,8 @@ const Dashboard = () => {
               ))}
             </div>
             <p className="text-center text-lg font-medium">
-              Click on Search pages to navigate to your Search engine
+              Click on Search pages to navigate to your Search engine <br/>
+              <b>Maximum allowed engines are 5</b>
             </p>
             <div className="App">
               {/* Button to open modal */}
@@ -182,7 +189,8 @@ const Dashboard = () => {
         ) : (
           <div className="mx-auto mt-16 p-5 ">
             <p className="text-center font-bold">
-              You don't have any search engines Click below to generate
+              You don't have any search engines Click below to generate <br/>
+               <b>Maximum Search engines allowed 5</b>
             </p>
             <div className="App">
               {/* Button to open modal */}
