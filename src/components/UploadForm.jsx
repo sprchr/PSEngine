@@ -69,9 +69,21 @@ const UploadForm = ({index}) => {
       if (fileInputRef.current) {
         fileInputRef.current.value = ""; // Reset the input value
       }
-      setTimeout(async () => {
-        await fetchFiles(); // Call your fetchFiles function after 3 seconds
-      }, 3000); 
+      const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/files/${user.slice(1,user.length-1).toLowerCase()}-${index}`);
+    
+      if(response.data){
+        const fileExists = response.data.some((f) => f === File.name);
+        if(!fileExists) {
+          response.data.push(File.name)
+        }
+        setFiles(response.data)
+      }
+      else {
+        const data = []
+        data.push(File.name)
+        setFiles(data)
+      }
+      
     }
   };
 
@@ -91,16 +103,26 @@ const UploadForm = ({index}) => {
       setError("Error deleting file.");
     } finally{
         setDeleteData(false)
-        setTimeout(async () => {
-          await fetchFiles(); // Call your fetchFiles function after 3 seconds
-        }, 2000);
-    }
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/files/${user.slice(1,user.length-1).toLowerCase()}-${index}`);
+       
+       
+        if(response.data.length > 0) {
+          if (response.data.some((f) => f === f)) {
+            const updatedFiles = files.filter((f) => f !== file);
+            setFiles(updatedFiles);
+          } 
+        }
+        else {
+          setFiles([])
+        }
+      
+      }
   };
   const fetchFiles = async () => {
-  
     try {
       const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/files/${user.slice(1,user.length-1).toLowerCase()}-${index}`);
       setFiles(response.data);
+  
     } catch (err) {
       setError("Error fetching files.");
     } finally {
@@ -120,7 +142,7 @@ const UploadForm = ({index}) => {
         onClick={handleUpload}
         className="w-full bg-blue-500 text-white p-2 rounded mt-2"
       >
-        Upload PDF
+        Upload File
       </button>
       <p className="mt-4">{uploadMessage}</p>
  
@@ -132,8 +154,8 @@ const UploadForm = ({index}) => {
      ) : (
        <ul className="space-y-2">
           {files.length > 0 ? (
-            files.map((file) => (
-              <li key={file.id} className="bg-gray-100 p-2 rounded border flex justify-between items-center">
+            files.map((file,index) => (
+              <li key={file.id || index} className="bg-gray-100 p-2 rounded border flex justify-between items-center">
                 <span>{file}</span>
                 <button
                   onClick={() => deleteFile(file)}
